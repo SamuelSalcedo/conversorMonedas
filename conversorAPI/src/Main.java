@@ -1,3 +1,7 @@
+import com.google.gson.Gson;
+import models.monedasConversion;
+import org.w3c.dom.ranges.Range;
+
 import java.io.FileInputStream;
 import java.io.IOException;
 import java.net.URI;
@@ -5,10 +9,7 @@ import java.net.URLClassLoader;
 import java.net.http.HttpClient;
 import java.net.http.HttpRequest;
 import java.net.http.HttpResponse;
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Properties;
-import java.util.Scanner;
+import java.util.*;
 
 public class Main {
     public static List<String> monedas = new ArrayList<>();
@@ -87,7 +88,7 @@ public class Main {
     public static void getJson(){
 
         try {
-            System.out.println(": "+url_str);
+           // System.out.println(": "+url_str);
 
             // Creando cliente HTTP
             //metodo abstracto para crear la peticion http
@@ -103,12 +104,27 @@ public class Main {
 
             //vuelca el contenido de la respuesta en un json
             json = response.body();
-            System.out.println(json);
 
-            //crea una instancia de la clase record para usarla como base para el json
-            //starWarsAPI mitituloSW = gson.fromJson(json, starWarsAPI.class);
+            Gson gson = new Gson();
 
-            // System.out.println(mitituloSW);
+            // Deserializa el JSON usando el record
+            monedasConversion data = gson.fromJson(json, monedasConversion.class);
+           // System.out.println(json);
+
+            System.out.println("Estado de la API: " + data.result());
+            System.out.println("Moneda Base: " + data.base_code());
+            System.out.println("Ultima vez de consulta: "+data.time_last_update_utc());
+
+            // Acceder a las tasas
+            Map<String, Double> tasas = data.conversion_rates();
+            System.out.println("Equivalencias de conversión:");
+
+            for (int i = 0; i < monedas.size(); i++) {
+
+                System.out.println(i+1+".- " + tasas.get(monedas.get(i))+" "+monedas.get(i));
+            }
+
+
         }catch (IllegalArgumentException ex) {
             System.out.println("VERIFICA LA DIRECCION");
 
